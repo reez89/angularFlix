@@ -1,5 +1,5 @@
 export interface Movies {
-  resultss?: (ResultsEntity)[] | null;
+  results?: (ResultsEntity)[] | null;
   page: number;
   total_results: number;
   dates: Dates;
@@ -26,4 +26,19 @@ export interface ResultsEntity {
 export interface Dates {
   maximum: string;
   minimum: string;
+}
+
+/* I will use it to retrive viedos */
+export interface MoviesVideo {
+  id: number;
+  results?: (ResultsEntity_)[] | null;
+}
+export interface ResultsEntity_ {
+  iso_639_1: string;
+  iso_3166_1: string;
+  key: string;
+  name: string;
+  site: string;
+  size: number;
+  type: string;
 }
