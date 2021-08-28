@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { Movies, MoviesVideo } from '../models/movies';
 
@@ -13,7 +14,8 @@ const enum endpoint {
   upcoming = '/movie/upcoming',
   tranding = '/trending/all/week',
   orginals = '/discover/tv',
-  id = '/movie/'
+  generalMovie = '/movie/',
+  video = '/videos'
 }
 @Injectable({
   providedIn: 'root'
@@ -22,31 +24,44 @@ export class MovieService {
 
   private URL = 'https://api.themoviedb.org/3';
   private youtubeURL = 'https://www.youtube.com/watch?v=';
-  private api_key = environment.apiKey;
+  private apiKey = environment.apiKey;
+  private lan = environment.lan;
 
   constructor(private http: HttpClient) { }
 
   getLatestMovie(): Observable<Movies>{
-    return this.http.get<Movies>(`${this.URL}${endpoint.latest}`, {params: {api_key: this.api_key}});
+    return this.http.get<Movies>(`${this.URL}${endpoint.latest}`,
+    {params: {api_key: this.apiKey, language: this.lan}});
   }
   getNowPlaying(): Observable<Movies>{
-    return this.http.get<Movies>(`${this.URL}${endpoint.now_playing}`, {params: {api_key: this.api_key}});
+    return this.http.get<Movies>(`${this.URL}${endpoint.now_playing}`,
+    {params: {api_key: this.apiKey, language: this.lan}});
   }
   getOriginals(): Observable<Movies>{
-    return this.http.get<Movies>(`${this.URL}${endpoint.orginals}`, {params: {api_key: this.api_key}});
+    return this.http.get<Movies>(`${this.URL}${endpoint.orginals}`,
+    {params: {api_key: this.apiKey, language: this.lan}});
   }
   getPopular(): Observable<Movies>{
-    return this.http.get<Movies>(`${this.URL}${endpoint.popular}`, {params: {api_key: this.api_key}});
+    return this.http.get<Movies>(`${this.URL}${endpoint.popular}`,
+    {params: {api_key: this.apiKey, language: this.lan}});
   }
   getTopRated(): Observable<Movies>{
-    return this.http.get<Movies>(`${this.URL}${endpoint.top_rated}`, {params: {api_key: this.api_key}});
+    return this.http.get<Movies>(`${this.URL}${endpoint.top_rated}`,
+    {params: {api_key: this.apiKey, language: this.lan}});
   }
   getTranding(): Observable<Movies>{
-    return this.http.get<Movies>(`${this.URL}${endpoint.tranding}`, {params: {api_key: this.api_key}});
+    return this.http.get<Movies>(`${this.URL}${endpoint.tranding}`,
+    {params: {api_key: this.apiKey, language: this.lan}});
   }
 
-  getMovieVideos(movieId): Observable<MoviesVideo>{
-    return this.http.get<MoviesVideo>(`${this.URL}${endpoint.id}${movieId}/videos?`, {params: {api_key: this.api_key}});
+  getMovieVideos(movieId: number): Observable<MoviesVideo>{
+    return this.http.get<MoviesVideo>
+          (`${this.URL}${endpoint.generalMovie}${movieId}${endpoint.video}`,    {params: {api_key: this.apiKey, language: this.lan}}
+          );
+    // return this.http.get(`https://api.themoviedb.org/3/movie/1402/videos?api_key=63c44cc4459f95138303a72049a37548&language=en-US
+    // `).pipe(
+    //   tap(data => console.log(data))
+    // )
   }
 
 

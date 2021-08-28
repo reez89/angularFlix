@@ -38,10 +38,19 @@
 
       <div class="header_right">
         <ul>
-          <li><a href="#"><mat-icon>search</mat-icon></a></li>
+          <li>
+            <mat-icon>search</mat-icon>
+            <input
+              [(ngModel)]="search"
+              type="text"
+              placeholder="Search Box">
+          </li>
+          <!--
           <li><a href="#">Children</a></li>
+
           <li><a href="#"><mat-icon>card_giftcard</mat-icon></a></li>
           <li><a href="#"><mat-icon>notifications</mat-icon></a></li>
+          -->
           <li>
             <img src="http://www.begool.it/img/manga-avatar-5.gif" alt="avatar" style="width: 50px">
           </li>

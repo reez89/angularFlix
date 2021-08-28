@@ -1,10 +1,19 @@
-import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  HostListener,
+  Input,
+  OnDestroy,
+  OnInit,
+  ViewChild
+} from '@angular/core';
 import { forkJoin, Observable, Subscription } from 'rxjs';
 import { Movies, MoviesVideo } from './models/movies';
 import { MovieService } from './services/movie.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
-import { first, map , switchMap, tap} from 'rxjs/operators';
+import { first, map , mergeMap, switchMap, tap} from 'rxjs/operators';
+import { couldStartTrivia } from 'typescript';
 
 @Component({
   selector: 'app-root',
@@ -12,11 +21,12 @@ import { first, map , switchMap, tap} from 'rxjs/operators';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit, OnDestroy{
-  title = 'angularFlix';
-  sticky = false;
 
+  @Input() search: string;
+
+  sticky = false;
   subs: Array<Observable<any>> = [];
-  subs_: Subscription[] = [];
+  subsVideo: Array<Observable<any>> = [];
 
 /* MOVIE VARIABLES */
   tranding: Movies;
@@ -25,7 +35,7 @@ export class AppComponent implements OnInit, OnDestroy{
   originals: Movies;
   nowPlaying: Movies;
   latest: Movies;
-  prova;
+  originalsVideo: MoviesVideo;
 /* SLIDER CONFIG */
   sliderConfing = {
     slidesToShow: 9,
@@ -44,59 +54,68 @@ export class AppComponent implements OnInit, OnDestroy{
       this.movie.getTranding().pipe(tap((data)  => {
         this.tranding = data;
         this.headerBGUrl = 'https://image.tmdb.org/t/p/original' + this.tranding.results[0].backdrop_path;
-
       }))
     );
+    // POPULAR
     this.subs.push(this.movie.getPopular().pipe(
       tap((data: Movies) => {
         this.popular = data;
-    })));
-
+     }))
+    );
+    // TOP RATED
     this.subs.push(this.movie.getTopRated().pipe(
       tap((data: Movies) => {
         this.topRated = data;
-        })
-      )
+      }))
     );
-
+    // LATEST
     this.subs.push(this.movie.getLatestMovie().pipe(
       tap((data: Movies) => {
         this.latest = data;
-    })));
-
+      }))
+    );
+    // NOW PLAYING
     this.subs.push(this.movie.getNowPlaying().pipe(
       tap((data: Movies) => {
         this.nowPlaying = data;
-    })));
-
+      }))
+    );
+    // ORIGINALS
     this.subs.push(this.movie.getOriginals().pipe(
       tap((data: Movies) => {
         this.originals = data;
-    })));
+     }))
+    );
+
+    forkJoin(this.subs).pipe(
+      map((dataVideo: Movies[]) => {
+        const originalsResults = this.originals.results[1];
+        this.subsVideo.push(
+          this.movie.getMovieVideos(originalsResults.id).pipe(
+            map((data: MoviesVideo) => {
+              this.originalsVideo = data;
+              console.log('ORIGINAL VIDEOS', this.originalsVideo);
+            })
+          )
+        );
+
+        forkJoin([...this.subsVideo]).subscribe();
+      })
+    ).subscribe();
 
 
-    forkJoin([...this.subs]).pipe(first()).subscribe(([popular, topRated, latest, nowPlaying, originals]) => {
-      const data = popular.results;
-      const newDataArray: Array<Number>[] = [];
-      if(!!popular.results){
-        data.forEach((id) => {
-         newDataArray.push(id.id);
-        })
-        console.log(newDataArray);
-      }
-      console.log(popular.results.forEach((id) => {id} ));
-    });
+
   }
 
-  ngOnDestroy(){
-   /*  this.subs.map(s => s.unsubscribe()) */
-  }
+
+
+
+
+  ngOnDestroy(){}
 
   @HostListener('window:scroll', ['$event'])
-
   handleScroll() {
     const windowScroll = window.pageYOffset;
-
     if (windowScroll >= this.header.nativeElement.offsetHeight){
       this.sticky = true;
     }else{

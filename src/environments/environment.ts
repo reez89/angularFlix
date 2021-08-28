@@ -5,5 +5,6 @@
 export const environment = {
   production: false,
   apiKey: '63c44cc4459f95138303a72049a37548',
+  lan: 'en-US',
   youtubeURL: 'https://www.youtube.com/watch?v='
 };

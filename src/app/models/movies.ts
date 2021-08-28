@@ -16,7 +16,7 @@ export interface ResultsEntity {
   backdrop_path: string;
   original_langueges: string;
   original_title: string;
-  genre_ids?:(number)[] | null;
+  genre_ids?: (number)[] | null;
   title: string;
   vote_average: number;
   overview: string;
@@ -31,9 +31,9 @@ export interface Dates {
 /* I will use it to retrive viedos */
 export interface MoviesVideo {
   id: number;
-  results?: (ResultsEntity_)[] | null;
+  results?: (ResultsEntityVideo)[] | null;
 }
-export interface ResultsEntity_ {
+export interface ResultsEntityVideo {
   iso_639_1: string;
   iso_3166_1: string;
   key: string;
