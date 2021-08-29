@@ -11,9 +11,7 @@ import { forkJoin, Observable, Subscription } from 'rxjs';
 import { Movies, MoviesVideo } from './models/movies';
 import { MovieService } from './services/movie.service';
 import { HttpClient } from '@angular/common/http';
-import { environment } from 'src/environments/environment';
-import { first, map , mergeMap, switchMap, tap} from 'rxjs/operators';
-import { couldStartTrivia } from 'typescript';
+import { concatMap, first, map , mergeMap, switchMap, tap} from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -84,25 +82,27 @@ export class AppComponent implements OnInit, OnDestroy{
     this.subs.push(this.movie.getOriginals().pipe(
       tap((data: Movies) => {
         this.originals = data;
-     }))
+      }))
     );
 
     forkJoin(this.subs).pipe(
-      map((dataVideo: Movies[]) => {
-        const originalsResults = this.originals.results[1];
-        this.subsVideo.push(
-          this.movie.getMovieVideos(originalsResults.id).pipe(
-            map((data: MoviesVideo) => {
-              this.originalsVideo = data;
-              console.log('ORIGINAL VIDEOS', this.originalsVideo);
-            })
-          )
-        );
-
-        forkJoin([...this.subsVideo]).subscribe();
+      first(),
+      concatMap((allMovies: Movies[]) => {
+        const movies = this.originals.results;
+        console.log('ARRAY ORIGINAL', allMovies);
+        movies.forEach(trailer => {
+            this.subsVideo.push(this.movie.getMovieVideos(trailer.id).pipe(
+              tap((data: MoviesVideo) => {
+                console.log(data);
+                this.originalsVideo = data;
+              })
+            ));
+        });
+        console.log('ORIGINAL SUBS', this.subsVideo);
+        console.log('ORIGINAL VIDEOS', this.originalsVideo);
+        return forkJoin([...this.subsVideo]);
       })
     ).subscribe();
-
 
 
   }
