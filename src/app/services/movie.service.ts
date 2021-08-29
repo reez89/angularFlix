@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { Movies, MoviesVideo } from '../models/movies';
 
@@ -58,10 +58,6 @@ export class MovieService {
     return this.http.get<MoviesVideo>
           (`${this.URL}${endpoint.generalMovie}${movieId}${endpoint.video}`,    {params: {api_key: this.apiKey, language: this.lan}}
           );
-    // return this.http.get(`https://api.themoviedb.org/3/movie/1402/videos?api_key=63c44cc4459f95138303a72049a37548&language=en-US
-    // `).pipe(
-    //   tap(data => console.log(data))
-    // )
   }
 
 

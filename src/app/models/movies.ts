@@ -5,7 +5,6 @@ export interface Movies {
   dates: Dates;
   total_pages: number;
 }
-
 export interface ResultsEntity {
   popularity: number;
   vote_count: number;

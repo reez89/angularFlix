@@ -7,11 +7,11 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
-import { forkJoin, Observable } from 'rxjs';
+import { forkJoin, Observable, Subscription } from 'rxjs';
 import { Movies, MoviesVideo } from './models/movies';
 import { MovieService } from './services/movie.service';
 import { HttpClient } from '@angular/common/http';
-import { concatMap, map , tap} from 'rxjs/operators';
+import { concatAll, concatMap, map , tap} from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -25,6 +25,8 @@ export class AppComponent implements OnInit, OnDestroy{
   sticky = false;
   subs: Array<Observable<any>> = [];
   subsVideo: Array<Observable<any>> = [];
+
+  subs_: Subscription[] = [];
 
 /* MOVIE VARIABLES */
   tranding: Movies;
@@ -86,31 +88,49 @@ export class AppComponent implements OnInit, OnDestroy{
     );
 
 
+    console.log('FUORI DAL FORKJOIN', this.subsVideo);
 
     forkJoin(this.subs).pipe(
-      concatMap(() => {
-        this.originals.results.forEach(movie => {
-          console.log(movie.id); // all movied id 1234,231231,3213,3213,etc
-          this.subsVideo.push(this.movie.getMovieVideos(movie.id).pipe(
-            map((videoJson: MoviesVideo) => {
-              console.log('VIDEO DATA', videoJson); // no log
-              this.originalsVideo = videoJson;
-            })
-          ));
-        });
-        console.log('ORIGINAL VIDEOS', this.originalsVideo); // undifined
-        return forkJoin([...this.subsVideo]);
-      })
-    ).subscribe();
+      concatMap((dataVideo): any => {
+          const originalsResults = this.originals.results;
+          console.log(originalsResults);
+          originalsResults.forEach(el => {
+            this.subsVideo.push(
+            this.movie.getMovieVideos(el.id).pipe(
+                  map((data: MoviesVideo) => {
+                      this.originalsVideo = data;
+                      console.log('ORIGINAL VIDEOS', this.originalsVideo);
+                  })
+              )
+            );
+          });
+          return forkJoin([...this.subsVideo]);
+      }),
+  ).subscribe();
 
+
+    // forkJoin(this.subs).subscribe(() => {
+    //   this.originals.results.forEach(movie => {
+    //     // console.log(movie.id); // all movied id 1234,231231,3213,3213,etc
+    //     this.subsVideo.push(this.movie.getMovieVideos(movie.id).pipe(
+    //       map((videoJson: MoviesVideo): any => {
+    //         console.log('VIDEO DATA', videoJson); // no log
+    //         this.originalsVideo = videoJson;
+    //       })
+    //     ));
+    //   });
+    //   console.log(this.originals.results);
+    //   console.log(this.originalsVideo);
+    //   return forkJoin(this.subsVideo).subscribe();
+    // });
 
 
   }
 
-  ngOnDestroy(){}
+ngOnDestroy(){}
 
-  @HostListener('window:scroll', ['$event'])
-  handleScroll() {
+@HostListener('window:scroll', ['$event'])
+handleScroll() {
     const windowScroll = window.pageYOffset;
     if (windowScroll >= this.header.nativeElement.offsetHeight){
       this.sticky = true;
