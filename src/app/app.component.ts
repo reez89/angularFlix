@@ -7,11 +7,11 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
-import { forkJoin, Observable, Subscription } from 'rxjs';
+import { forkJoin, Observable } from 'rxjs';
 import { Movies, MoviesVideo } from './models/movies';
 import { MovieService } from './services/movie.service';
 import { HttpClient } from '@angular/common/http';
-import { concatMap, first, map , mergeMap, switchMap, tap} from 'rxjs/operators';
+import { concatMap, map , tap} from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -47,7 +47,7 @@ export class AppComponent implements OnInit, OnDestroy{
 
   constructor(private movie: MovieService, private http: HttpClient){}
 
-  ngOnInit(): void {
+  ngOnInit() {
     this.subs.push(
       this.movie.getTranding().pipe(tap((data)  => {
         this.tranding = data;
@@ -85,31 +85,27 @@ export class AppComponent implements OnInit, OnDestroy{
       }))
     );
 
+
+
     forkJoin(this.subs).pipe(
-      first(),
-      concatMap((allMovies: Movies[]) => {
-        const movies = this.originals.results;
-        console.log('ARRAY ORIGINAL', allMovies);
-        movies.forEach(trailer => {
-            this.subsVideo.push(this.movie.getMovieVideos(trailer.id).pipe(
-              tap((data: MoviesVideo) => {
-                console.log(data);
-                this.originalsVideo = data;
-              })
-            ));
+      concatMap(() => {
+        this.originals.results.forEach(movie => {
+          console.log(movie.id); // all movied id 1234,231231,3213,3213,etc
+          this.subsVideo.push(this.movie.getMovieVideos(movie.id).pipe(
+            map((videoJson: MoviesVideo) => {
+              console.log('VIDEO DATA', videoJson); // no log
+              this.originalsVideo = videoJson;
+            })
+          ));
         });
-        console.log('ORIGINAL SUBS', this.subsVideo);
-        console.log('ORIGINAL VIDEOS', this.originalsVideo);
+        console.log('ORIGINAL VIDEOS', this.originalsVideo); // undifined
         return forkJoin([...this.subsVideo]);
       })
     ).subscribe();
 
 
+
   }
-
-
-
-
 
   ngOnDestroy(){}
 
