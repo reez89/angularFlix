@@ -6,7 +6,7 @@
       'background-image': 'linear-gradient(rgba(0,0,0,0.8),rgba(0,0,0,0.3)), url('+headerBGUrl+')'
     }"
     >
-      <h2>{{tranding?.results[0].title}}</h2>
+      <h2>{{upcoming?.results[0].title}}</h2>
       <div class="header_buttons">
         <button class="play-button">
           <mat-icon>arrow_right</mat-icon>
@@ -63,11 +63,16 @@
   <div class="body"
     style="margin-top: 30rem;"
   >
-    <app-slider title="Trending" [movies]="tranding" [sliderConfig]="sliderConfing"></app-slider>
-    <app-slider title="Top rated" [movies]="topRated" [sliderConfig]="sliderConfing"></app-slider>
-    <app-slider title="Now Playing" [movies]="nowPlaying" [sliderConfig]="sliderConfing"></app-slider>
-    <app-slider title="Originals" [movies]="originals" [sliderConfig]="sliderConfing"></app-slider>
+    <app-slider title="Trending" [movies]="upcoming" [sliderConfig]="sliderConfing">
+      <div>
+        <h1>HELLO</h1>
+      </div>
+    </app-slider>
     <app-slider title="Popular" [movies]="popular" [sliderConfig]="sliderConfing"></app-slider>
+    <app-slider title="Top rated" [movies]="topRated" [sliderConfig]="sliderConfing"></app-slider>
+    <!-- <app-slider title="Latest" [movies]="latest" [sliderConfig]="sliderConfing"></app-slider> -->
+    <app-slider title="Now Playing" [movies]="nowPlaying" [sliderConfig]="sliderConfing"></app-slider>
+    <!-- <app-slider title="Originals" [movies]="originals" [sliderConfig]="sliderConfing"></app-slider> -->
   </div>
 </div>
 

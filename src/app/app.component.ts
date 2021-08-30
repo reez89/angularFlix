@@ -7,11 +7,11 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
-import { forkJoin, Observable, Subscription } from 'rxjs';
+import { forkJoin, Observable, pipe, Subscription } from 'rxjs';
 import { Movies, MoviesVideo } from './models/movies';
 import { MovieService } from './services/movie.service';
 import { HttpClient } from '@angular/common/http';
-import { concatAll, concatMap, map , tap} from 'rxjs/operators';
+import { concatAll, concatMap, first, map , tap} from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -26,15 +26,16 @@ export class AppComponent implements OnInit, OnDestroy{
   subs: Array<Observable<any>> = [];
   subsVideo: Array<Observable<any>> = [];
 
-  subs_: Subscription[] = [];
-
 /* MOVIE VARIABLES */
-  tranding: Movies;
+  upcoming: Movies;
   topRated: Movies;
   popular: Movies;
-  originals: Movies;
   nowPlaying: Movies;
   latest: Movies;
+  upcomingVideo: MoviesVideo;
+  popularVideo: MoviesVideo;
+  topRatedVideo: MoviesVideo;
+  nowPlayingVideo: MoviesVideo;
   originalsVideo: MoviesVideo;
 /* SLIDER CONFIG */
   sliderConfing = {
@@ -50,10 +51,11 @@ export class AppComponent implements OnInit, OnDestroy{
   constructor(private movie: MovieService, private http: HttpClient){}
 
   ngOnInit() {
+    // UPCOMING
     this.subs.push(
-      this.movie.getTranding().pipe(tap((data)  => {
-        this.tranding = data;
-        this.headerBGUrl = 'https://image.tmdb.org/t/p/original' + this.tranding.results[0].backdrop_path;
+      this.movie.getUpcoming().pipe(tap((data)  => {
+        this.upcoming = data;
+        this.headerBGUrl = 'https://image.tmdb.org/t/p/original' + this.upcoming.results[0].backdrop_path;
       }))
     );
     // POPULAR
@@ -78,52 +80,64 @@ export class AppComponent implements OnInit, OnDestroy{
     this.subs.push(this.movie.getNowPlaying().pipe(
       tap((data: Movies) => {
         this.nowPlaying = data;
-      }))
-    );
-    // ORIGINALS
-    this.subs.push(this.movie.getOriginals().pipe(
-      tap((data: Movies) => {
-        this.originals = data;
+        console.log(this.nowPlaying);
+
       }))
     );
 
+    forkJoin(this.subs).subscribe( data => {
+      const upcoming = [];
+      const popular = [];
+      const topRated = [];
+      const nowPlaying = [];
+      upcoming.push(data[0]);
+      popular.push(data[1]);
+      topRated.push(data[2]);
+      nowPlaying.push(data[4]);
 
-    console.log('FUORI DAL FORKJOIN', this.subsVideo);
+      upcoming.forEach(el => {
+        el.results.forEach(id => {
+          this.subsVideo.push(this.movie.getMovieVideos(id.id).pipe(
+            tap((videoTranding: MoviesVideo) => {
+              this.upcomingVideo = videoTranding;
+              console.log('UPCOMING', this.upcomingVideo);
+            })
+          ));
+        });
+      }); // 20
+      popular.forEach(el => {
+        el.results.forEach(id => {
+          this.subsVideo.push(this.movie.getMovieVideos(id.id).pipe(
+            tap((videoPopular: MoviesVideo) => {
+              this.popularVideo = videoPopular;
+              console.log('POPULAR', this.popularVideo);
+            })
+          ));
+        });
+      }); // 20
+      topRated.forEach(el => {
+        el.results.forEach(id => {
+          this.subsVideo.push(this.movie.getMovieVideos(id.id).pipe(
+            tap((videoTopRated: MoviesVideo) => {
+              this.topRatedVideo = videoTopRated;
+              console.log('TOP', this.topRatedVideo);
+            })
+          ));
+        });
+      }); // 20
+      nowPlaying.forEach(el => {
+        el.results.forEach(id => {
+          this.subsVideo.push(this.movie.getMovieVideos(id.id).pipe(
+            tap((videoNowPlaying: MoviesVideo) => {
+              this.nowPlayingVideo = videoNowPlaying;
+              console.log('PALYING', this.nowPlayingVideo);
+            })
+          ));
+        });
+      }); // 20
 
-    forkJoin(this.subs).pipe(
-      concatMap((dataVideo): any => {
-          const originalsResults = this.originals.results;
-          console.log(originalsResults);
-          originalsResults.forEach(el => {
-            this.subsVideo.push(
-            this.movie.getMovieVideos(el.id).pipe(
-                  map((data: MoviesVideo) => {
-                      this.originalsVideo = data;
-                      console.log('ORIGINAL VIDEOS', this.originalsVideo);
-                  })
-              )
-            );
-          });
-          return forkJoin([...this.subsVideo]);
-      }),
-  ).subscribe();
-
-
-    // forkJoin(this.subs).subscribe(() => {
-    //   this.originals.results.forEach(movie => {
-    //     // console.log(movie.id); // all movied id 1234,231231,3213,3213,etc
-    //     this.subsVideo.push(this.movie.getMovieVideos(movie.id).pipe(
-    //       map((videoJson: MoviesVideo): any => {
-    //         console.log('VIDEO DATA', videoJson); // no log
-    //         this.originalsVideo = videoJson;
-    //       })
-    //     ));
-    //   });
-    //   console.log(this.originals.results);
-    //   console.log(this.originalsVideo);
-    //   return forkJoin(this.subsVideo).subscribe();
-    // });
-
+      forkJoin([...this.subsVideo]).subscribe();
+    });
 
   }
 

@@ -12,8 +12,6 @@ const enum endpoint {
   popular = '/movie/popular',
   top_rated = '/movie/top_rated',
   upcoming = '/movie/upcoming',
-  tranding = '/trending/all/week',
-  orginals = '/discover/tv',
   generalMovie = '/movie/',
   video = '/videos'
 }
@@ -37,10 +35,6 @@ export class MovieService {
     return this.http.get<Movies>(`${this.URL}${endpoint.now_playing}`,
     {params: {api_key: this.apiKey, language: this.lan}});
   }
-  getOriginals(): Observable<Movies>{
-    return this.http.get<Movies>(`${this.URL}${endpoint.orginals}`,
-    {params: {api_key: this.apiKey, language: this.lan}});
-  }
   getPopular(): Observable<Movies>{
     return this.http.get<Movies>(`${this.URL}${endpoint.popular}`,
     {params: {api_key: this.apiKey, language: this.lan}});
@@ -49,8 +43,8 @@ export class MovieService {
     return this.http.get<Movies>(`${this.URL}${endpoint.top_rated}`,
     {params: {api_key: this.apiKey, language: this.lan}});
   }
-  getTranding(): Observable<Movies>{
-    return this.http.get<Movies>(`${this.URL}${endpoint.tranding}`,
+  getUpcoming(): Observable<Movies>{
+    return this.http.get<Movies>(`${this.URL}${endpoint.upcoming}`,
     {params: {api_key: this.apiKey, language: this.lan}});
   }
 
