@@ -1,9 +1,10 @@
 export interface Movies {
-  results?: (ResultsEntity)[] | null;
-  page: number;
-  total_results: number;
-  dates: Dates;
-  total_pages: number;
+  results: ResultsEntity[];
+  // page: number;
+  // total_results: number;
+  // dates: Dates;
+  // total_pages: number;
+  // trailer: MoviesVideo;
 }
 export interface ResultsEntity {
   popularity: number;
@@ -15,11 +16,12 @@ export interface ResultsEntity {
   backdrop_path: string;
   original_langueges: string;
   original_title: string;
-  genre_ids?: (number)[] | null;
+  genre_ids?: ( number )[] | null;
   title: string;
   vote_average: number;
   overview: string;
   release_date: string;
+
 }
 
 export interface Dates {
@@ -30,7 +32,7 @@ export interface Dates {
 /* I will use it to retrive viedos */
 export interface MoviesVideo {
   id: number;
-  results?: (ResultsEntityVideo)[] | null;
+  results: ResultsEntityVideo[];
 }
 export interface ResultsEntityVideo {
   iso_639_1: string;

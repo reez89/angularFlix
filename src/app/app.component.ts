@@ -11,144 +11,137 @@ import { forkJoin, Observable, pipe, Subscription } from 'rxjs';
 import { Movies, MoviesVideo } from './models/movies';
 import { MovieService } from './services/movie.service';
 import { HttpClient } from '@angular/common/http';
-import { concatAll, concatMap, first, map , tap} from 'rxjs/operators';
+import { exhaustMap, map, switchMap, tap } from 'rxjs/operators';
+import { DomSanitizer } from '@angular/platform-browser';
 
-@Component({
+@Component( {
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
-})
-export class AppComponent implements OnInit, OnDestroy{
+  styleUrls: [ './app.component.scss' ]
+} )
+export class AppComponent implements OnInit, OnDestroy {
 
   @Input() search: string;
-
+  hoverIndex: any;
   sticky = false;
   subs: Array<Observable<any>> = [];
   subsVideo: Array<Observable<any>> = [];
-
-/* MOVIE VARIABLES */
+  videoUrl: string = "https://www.youtube.com/embed/";
+  /* MOVIE VARIABLES */
   upcoming: Movies;
   topRated: Movies;
-  popular: Movies;
+  popular: any;
   nowPlaying: Movies;
   latest: Movies;
-  upcomingVideo: MoviesVideo;
-  popularVideo: MoviesVideo;
-  topRatedVideo: MoviesVideo;
-  nowPlayingVideo: MoviesVideo;
-  originalsVideo: MoviesVideo;
-/* SLIDER CONFIG */
+  /* SLIDER CONFIG */
   sliderConfing = {
     slidesToShow: 9,
     slidesToScroll: 2,
     arrows: true,
     autoplay: false,
+    responsive: [
+      {
+        breakpoint: 1024,
+        settings: {
+          slidesToShow: 3,
+          slidesToScroll: 3,
+          infinite: true,
+          dots: true
+        }
+      },
+      {
+        breakpoint: 600,
+        settings: {
+          slidesToShow: 2,
+          slidesToScroll: 2
+        }
+      },
+      {
+        breakpoint: 480,
+        settings: {
+          slidesToShow: 1,
+          slidesToScroll: 1
+        }
+      }
+    ]
   };
 
-  @ViewChild ('stickHeader') header: ElementRef;
+  @ViewChild( 'stickHeader' ) header: ElementRef;
   headerBGUrl: string;
 
-  constructor(private movie: MovieService, private http: HttpClient){}
+  constructor(
+    private movie: MovieService,
+    private http: HttpClient,
+    private hostElement: ElementRef,
+    private domSanitizer: DomSanitizer ) {}
 
   ngOnInit() {
+
     // UPCOMING
     this.subs.push(
-      this.movie.getUpcoming().pipe(tap((data)  => {
+      this.movie.getUpcoming().pipe( tap( ( data ) => {
         this.upcoming = data;
-        this.headerBGUrl = 'https://image.tmdb.org/t/p/original' + this.upcoming.results[0].backdrop_path;
-      }))
+        this.headerBGUrl = 'https://image.tmdb.org/t/p/original' + this.upcoming.results[ 0 ].backdrop_path;
+      } ) )
     );
     // POPULAR
-    this.subs.push(this.movie.getPopular().pipe(
-      tap((data: Movies) => {
+    this.subs.push( this.movie.getPopular().pipe(
+      tap( ( data: Movies ) => {
         this.popular = data;
-     }))
+      } ) )
     );
     // TOP RATED
-    this.subs.push(this.movie.getTopRated().pipe(
-      tap((data: Movies) => {
+    this.subs.push( this.movie.getTopRated().pipe(
+      tap( ( data: Movies ) => {
         this.topRated = data;
-      }))
+      } ) )
     );
     // LATEST
-    this.subs.push(this.movie.getLatestMovie().pipe(
-      tap((data: Movies) => {
+    this.subs.push( this.movie.getLatestMovie().pipe(
+      tap( ( data: Movies ) => {
         this.latest = data;
-      }))
+      } ) )
     );
     // NOW PLAYING
-    this.subs.push(this.movie.getNowPlaying().pipe(
-      tap((data: Movies) => {
+    this.subs.push( this.movie.getNowPlaying().pipe(
+      switchMap( ( data: Movies ) => {
+        return data.results;
+      } ),
+      map( ( data: any ) => {
         this.nowPlaying = data;
-        console.log(this.nowPlaying);
-
-      }))
+        this.subsVideo.push(
+          this.movie.getMovieTrailer( data.id ).pipe(
+            map( ( trailers: MoviesVideo ) => {
+              return this.nowPlaying = {
+                ...data,
+                trailers
+              };
+            } )
+          ) );
+      } ),
+    )
     );
 
-    forkJoin(this.subs).subscribe( data => {
-      const upcoming = [];
-      const popular = [];
-      const topRated = [];
-      const nowPlaying = [];
-      upcoming.push(data[0]);
-      popular.push(data[1]);
-      topRated.push(data[2]);
-      nowPlaying.push(data[4]);
 
-      upcoming.forEach(el => {
-        el.results.forEach(id => {
-          this.subsVideo.push(this.movie.getMovieVideos(id.id).pipe(
-            tap((videoTranding: MoviesVideo) => {
-              this.upcomingVideo = videoTranding;
-              console.log('UPCOMING', this.upcomingVideo);
-            })
-          ));
-        });
-      }); // 20
-      popular.forEach(el => {
-        el.results.forEach(id => {
-          this.subsVideo.push(this.movie.getMovieVideos(id.id).pipe(
-            tap((videoPopular: MoviesVideo) => {
-              this.popularVideo = videoPopular;
-              console.log('POPULAR', this.popularVideo);
-            })
-          ));
-        });
-      }); // 20
-      topRated.forEach(el => {
-        el.results.forEach(id => {
-          this.subsVideo.push(this.movie.getMovieVideos(id.id).pipe(
-            tap((videoTopRated: MoviesVideo) => {
-              this.topRatedVideo = videoTopRated;
-              console.log('TOP', this.topRatedVideo);
-            })
-          ));
-        });
-      }); // 20
-      nowPlaying.forEach(el => {
-        el.results.forEach(id => {
-          this.subsVideo.push(this.movie.getMovieVideos(id.id).pipe(
-            tap((videoNowPlaying: MoviesVideo) => {
-              this.nowPlayingVideo = videoNowPlaying;
-              console.log('PALYING', this.nowPlayingVideo);
-            })
-          ));
-        });
-      }); // 20
-
-      forkJoin([...this.subsVideo]).subscribe();
-    });
+    forkJoin( this.subs ).subscribe( () => {
+      // Without trailers
+      console.log( this.nowPlaying );
+      // With trailers
+      forkJoin( this.subsVideo ).subscribe( () => {
+        console.log( this.nowPlaying );
+      } );
+    } );
 
   }
 
-ngOnDestroy(){}
+  ngOnDestroy() {}
 
-@HostListener('window:scroll', ['$event'])
-handleScroll() {
+  @HostListener( 'window:scroll', [ '$event' ] )
+  handleScroll() {
     const windowScroll = window.pageYOffset;
-    if (windowScroll >= this.header.nativeElement.offsetHeight){
+    if ( windowScroll >= this.header.nativeElement.offsetHeight ) {
       this.sticky = true;
-    }else{
+    } else {
       this.sticky = false;
     }
   }

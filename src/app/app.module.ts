@@ -12,12 +12,14 @@ import { HttpClientModule } from '@angular/common/http';
 import { SliderComponent } from './components/slider/slider.component';
 import { MatIconModule } from '@angular/material/icon';
 import {MatBadgeModule} from '@angular/material/badge';
+import { SafePipe } from './safe-pipe.pipe';
 
 
 @NgModule({
   declarations: [
     AppComponent,
-    SliderComponent
+    SliderComponent,
+    SafePipe
   ],
   imports: [
     BrowserModule,

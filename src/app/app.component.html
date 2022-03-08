@@ -63,17 +63,30 @@
   <div class="body"
     style="margin-top: 30rem;"
   >
-    <app-slider title="Trending" [movies]="upcoming" [sliderConfig]="sliderConfing">
-      <div>
-        <h1>HELLO</h1>
-      </div>
+
+      <app-slider 
+      title="Trending" 
+      [movies]="upcoming" 
+      [sliderConfig]="sliderConfing"
+      >
+
     </app-slider>
-    <app-slider title="Popular" [movies]="popular" [sliderConfig]="sliderConfing"></app-slider>
-    <app-slider title="Top rated" [movies]="topRated" [sliderConfig]="sliderConfing"></app-slider>
+  
+    
+    <app-slider 
+      title="Popular" 
+      [movies]="popular"
+  
+      [sliderConfig]="sliderConfing"></app-slider>
+    <app-slider 
+      title="Top rated" 
+      [movies]="topRated"
+      [sliderConfig]="sliderConfing"></app-slider>
     <!-- <app-slider title="Latest" [movies]="latest" [sliderConfig]="sliderConfing"></app-slider> -->
-    <app-slider title="Now Playing" [movies]="nowPlaying" [sliderConfig]="sliderConfing"></app-slider>
+    <app-slider 
+      title="Now Playing"
+      [movies]="nowPlaying"
+      [sliderConfig]="sliderConfing"></app-slider>
     <!-- <app-slider title="Originals" [movies]="originals" [sliderConfig]="sliderConfing"></app-slider> -->
   </div>
 </div>
-
-

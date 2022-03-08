@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { Movies, MoviesVideo } from '../models/movies';
 
@@ -15,9 +15,9 @@ const enum endpoint {
   generalMovie = '/movie/',
   video = '/videos'
 }
-@Injectable({
+@Injectable( {
   providedIn: 'root'
-})
+} )
 export class MovieService {
 
   private URL = 'https://api.themoviedb.org/3';
@@ -25,33 +25,34 @@ export class MovieService {
   private apiKey = environment.apiKey;
   private lan = environment.lan;
 
-  constructor(private http: HttpClient) { }
+  constructor( private http: HttpClient ) {}
 
-  getLatestMovie(): Observable<Movies>{
-    return this.http.get<Movies>(`${this.URL}${endpoint.latest}`,
-    {params: {api_key: this.apiKey, language: this.lan}});
+  getLatestMovie(): Observable<Movies> {
+    return this.http.get<Movies>( `${this.URL}${endpoint.latest}`,
+      { params: { api_key: this.apiKey, language: this.lan } } );
   }
-  getNowPlaying(): Observable<Movies>{
-    return this.http.get<Movies>(`${this.URL}${endpoint.now_playing}`,
-    {params: {api_key: this.apiKey, language: this.lan}});
+  getNowPlaying(): Observable<Movies> {
+    return this.http.get<Movies>( `${this.URL}${endpoint.now_playing}`,
+      { params: { api_key: this.apiKey, language: this.lan } } );
   }
-  getPopular(): Observable<Movies>{
-    return this.http.get<Movies>(`${this.URL}${endpoint.popular}`,
-    {params: {api_key: this.apiKey, language: this.lan}});
+  getPopular(): Observable<Movies> {
+    return this.http.get<Movies>( `${this.URL}${endpoint.popular}`,
+      { params: { api_key: this.apiKey, language: this.lan } } );
   }
-  getTopRated(): Observable<Movies>{
-    return this.http.get<Movies>(`${this.URL}${endpoint.top_rated}`,
-    {params: {api_key: this.apiKey, language: this.lan}});
+  getTopRated(): Observable<Movies> {
+    return this.http.get<Movies>( `${this.URL}${endpoint.top_rated}`,
+      { params: { api_key: this.apiKey, language: this.lan } } );
   }
-  getUpcoming(): Observable<Movies>{
-    return this.http.get<Movies>(`${this.URL}${endpoint.upcoming}`,
-    {params: {api_key: this.apiKey, language: this.lan}});
+  getUpcoming(): Observable<Movies> {
+    return this.http.get<Movies>( `${this.URL}${endpoint.upcoming}`,
+      { params: { api_key: this.apiKey, language: this.lan } } );
   }
 
-  getMovieVideos(movieId: number): Observable<MoviesVideo>{
+  getMovieTrailer( movieId: number ): Observable<MoviesVideo> {
     return this.http.get<MoviesVideo>
-          (`${this.URL}${endpoint.generalMovie}${movieId}${endpoint.video}`,    {params: {api_key: this.apiKey, language: this.lan}}
-          );
+      ( `${this.URL}${endpoint.generalMovie}${movieId}${endpoint.video}`,
+        { params: { api_key: this.apiKey, language: this.lan } }
+      );
   }
 
 

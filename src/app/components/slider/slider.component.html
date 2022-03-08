@@ -1,16 +1,28 @@
 <h2>{{title}}</h2>
-
 <div class="movie">
   <div class="movie_images">
     <div class="thumbnails">
       <ngx-slick-carousel [config]="sliderConfig" class="carousel">
         <div
           class="slick-item"
-          *ngFor="let item of movies?.results" ngxSlickItem>
+          *ngFor="let item of movies?.results; let i=index" ngxSlickItem>
           <img
+            (mouseenter)="enter(i)" 
+            (mouseleave)="leave(i)"
             src="https://image.tmdb.org/t/p/w200{{item?.poster_path}}"
             alt="{{item.title}}">
-        </div>
+          </div>
+          <!-- <div
+            class="slick-item"
+            *ngFor="let item of trailer">
+            <iframe
+              width="208" 
+              height="300"
+              frameborder="0" 
+              allowfullscreen
+              [src]="videoUrl + item.results?.key  | safePipe "></iframe>
+          </div>
+         -->
       </ngx-slick-carousel>
     </div>
   </div>
